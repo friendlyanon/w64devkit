@@ -271,7 +271,7 @@
 -        -o $PREFIX/bin/pkg-config.exe $PREFIX/src/pkg-config.c \
 -        -lkernel32 \
 - && $ARCH-gcc \
-+ && rm -rf $PREFIX/lib/*.a $PREFIX/lib/*.la $PREFIX/include
++ && rm -rf $PREFIX/lib/*.a $PREFIX/lib/*.la $PREFIX/include $PREFIX/share
 +RUN $ARCH-gcc \
          -Os -fno-asynchronous-unwind-tables -fno-builtin -Wl,--gc-sections \
          -s -nostdlib -o $PREFIX/bin/vc++filt.exe $PREFIX/src/vc++filt.c \
