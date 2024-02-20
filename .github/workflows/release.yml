@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      repository:
+        default: skeeto/w64devkit
+        required: true
+      ref:
+        default: master
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/checkout@v4
+      with:
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
+        path: src
+
+    - name: Patch
+      run: patch -p 0 -u -i minimal.patch
+
+    - name: Build
+      run: docker buildx b -t mingw src
+
+    - name: Run
+      run: docker run --rm mingw > mingw.zip
+
+    - name: Get date
+      id: date
+      run: printf $'date=%s\n' "$(date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: mingw.zip
+        tag_name: r${{ steps.date.outputs.date }}
+        body: Release ${{ steps.date.outputs.date }}
