@@ -1,7 +1,7 @@
 --- src/Dockerfile
 +++ src/Dockerfile
 @@ -3,21 +3,12 @@
- ARG VERSION=1.22.0
+ ARG VERSION=1.23.0
  ARG PREFIX=/w64devkit
  ARG BINUTILS_VERSION=2.42
 -ARG BUSYBOX_VERSION=FRP-5301-gda71f7c57
@@ -22,7 +22,7 @@
  
  RUN apt-get update && apt-get install --yes --no-install-recommends \
    build-essential curl libgmp-dev libmpc-dev libmpfr-dev m4 zip
-@@ -27,40 +18,19 @@
+@@ -27,48 +18,29 @@
  RUN curl --insecure --location --remote-name-all --remote-header-name \
      https://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.xz \
      https://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz \
@@ -66,7 +66,18 @@
       $PREFIX/src/
  
  ARG ARCH=x86_64-w64-mingw32
-@@ -286,31 +256,7 @@
+ 
+ # Build cross-compiler
+ 
++COPY minimal-pe-header.patch /binutils-$BINUTILS_VERSION/
+ WORKDIR /binutils-$BINUTILS_VERSION
+-RUN sed -ri 's/(static bool insert_timestamp = )/\1!/' ld/emultempl/pe*.em
++RUN sed -ri 's/(static bool insert_timestamp = )/\1!/' ld/emultempl/pe*.em && \
++    patch -p 0 -u -i minimal-pe-header.patch
+ WORKDIR /x-binutils
+ RUN /binutils-$BINUTILS_VERSION/configure \
+         --prefix=/bootstrap \
+@@ -286,31 +258,7 @@
   && make -j$(nproc) \
   && make install \
   && rm -rf $PREFIX/$ARCH/bin/ $PREFIX/bin/$ARCH-* \
@@ -99,7 +110,7 @@
  
  # Build some extra development tools
  
-@@ -324,187 +270,15 @@
+@@ -324,187 +272,15 @@
   && make -j$(nproc) \
   && cp gendef.exe $PREFIX/bin/
  

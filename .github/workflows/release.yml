@@ -24,7 +24,9 @@ jobs:
         path: src
 
     - name: Patch
-      run: patch -p 0 -u -i minimal.patch
+      run: |
+        patch -p 0 -u -i minimal.patch
+        cp minimal-pe-header.patch src
 
     - name: Build
       run: docker buildx b -t mingw src

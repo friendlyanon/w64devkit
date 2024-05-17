@@ -1,0 +1,249 @@
+--- include/coff/internal.h
++++ include/coff/internal.h
+@@ -53,9 +53,8 @@
+   unsigned short e_oemid;	/* OEM identifier (for e_oeminfo), 0x0 */
+   unsigned short e_oeminfo;	/* OEM information; e_oemid specific, 0x0 */
+   unsigned short e_res2[10];	/* Reserved words, all 0x0 */
+   bfd_vma  e_lfanew;		/* File address of new exe header, 0x80 */
+-  char dos_message[64];		/* Text which always follows DOS header.  */
+   bfd_vma  nt_signature;   	/* required NT signature, 0x4550 */
+ };
+ 
+ struct internal_filehdr
+--- bfd/libcoff-in.h
++++ bfd/libcoff-in.h
+@@ -146,9 +146,8 @@
+   struct internal_extra_pe_aouthdr pe_opthdr;
+   int dll;
+   int has_reloc_section;
+   int dont_strip_reloc;
+-  char dos_message[64];
+   /* The timestamp to insert into the output file.
+      If the timestamp is -1 then the current time is used.  */
+   int timestamp;
+   bool (*in_reloc_p) (bfd *, reloc_howto_type *);
+--- bfd/libcoff.h
++++ bfd/libcoff.h
+@@ -150,9 +150,8 @@
+   struct internal_extra_pe_aouthdr pe_opthdr;
+   int dll;
+   int has_reloc_section;
+   int dont_strip_reloc;
+-  char dos_message[64];
+   /* The timestamp to insert into the output file.
+      If the timestamp is -1 then the current time is used.  */
+   int timestamp;
+   bool (*in_reloc_p) (bfd *, reloc_howto_type *);
+--- bfd/peicode.h
++++ bfd/peicode.h
+@@ -257,19 +257,8 @@
+ 
+ static bool
+ pe_mkobject (bfd * abfd)
+ {
+-  /* Some x86 code followed by an ascii string.  */
+-  static const char default_dos_message[64] = {
+-    0x0e, 0x1f, 0xba, 0x0e, 0x00, 0xb4, 0x09, 0xcd,
+-    0x21, 0xb8, 0x01, 0x4c, 0xcd, 0x21, 0x54, 0x68,
+-    0x69, 0x73, 0x20, 0x70, 0x72, 0x6f, 0x67, 0x72,
+-    0x61, 0x6d, 0x20, 0x63, 0x61, 0x6e, 0x6e, 0x6f,
+-    0x74, 0x20, 0x62, 0x65, 0x20, 0x72, 0x75, 0x6e,
+-    0x20, 0x69, 0x6e, 0x20, 0x44, 0x4f, 0x53, 0x20,
+-    0x6d, 0x6f, 0x64, 0x65, 0x2e, 0x0d, 0x0d, 0x0a,
+-    0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+-
+   pe_data_type *pe = bfd_zalloc (abfd, sizeof (*pe));
+   abfd->tdata.pe_obj_data = pe;
+   if (pe == NULL)
+     return false;
+@@ -278,10 +267,8 @@
+ 
+   /* in_reloc_p is architecture dependent.  */
+   pe->in_reloc_p = in_reloc_p;
+ 
+-  memcpy (pe->dos_message, default_dos_message, sizeof (pe->dos_message));
+-
+   bfd_coff_long_section_names (abfd)
+     = coff_backend_info (abfd)->_bfd_coff_long_section_names;
+ 
+   return true;
+@@ -336,11 +323,8 @@
+   if (! _bfd_coff_arm_set_private_flags (abfd, internal_f->f_flags))
+     coff_data (abfd) ->flags = 0;
+ #endif
+ 
+-  memcpy (pe->dos_message, internal_f->pe.dos_message,
+-	  sizeof (pe->dos_message));
+-
+   return (void *) pe;
+ }
+ 
+ static bool
+@@ -1517,11 +1501,8 @@
+       bfd_set_error (bfd_error_wrong_format);
+       return NULL;
+     }
+ 
+-  memcpy (internal_f.pe.dos_message, dos_hdr.dos_message,
+-	  sizeof (internal_f.pe.dos_message));
+-
+   /* Read the optional header, which has variable size.  */
+   opt_hdr_size = internal_f.f_opthdr;
+ 
+   if (opt_hdr_size != 0)
+--- bfd/peXXigen.c
++++ bfd/peXXigen.c
+@@ -801,20 +801,20 @@
+   if (pe_data (abfd)->dll)
+     filehdr_in->f_flags |= F_DLL;
+ 
+   filehdr_in->pe.e_magic    = IMAGE_DOS_SIGNATURE;
+-  filehdr_in->pe.e_cblp     = 0x90;
+-  filehdr_in->pe.e_cp       = 0x3;
++  filehdr_in->pe.e_cblp     = 0x0;
++  filehdr_in->pe.e_cp       = 0x0;
+   filehdr_in->pe.e_crlc     = 0x0;
+-  filehdr_in->pe.e_cparhdr  = 0x4;
++  filehdr_in->pe.e_cparhdr  = 0x0;
+   filehdr_in->pe.e_minalloc = 0x0;
+-  filehdr_in->pe.e_maxalloc = 0xffff;
++  filehdr_in->pe.e_maxalloc = 0x0;
+   filehdr_in->pe.e_ss       = 0x0;
+-  filehdr_in->pe.e_sp       = 0xb8;
++  filehdr_in->pe.e_sp       = 0x0;
+   filehdr_in->pe.e_csum     = 0x0;
+   filehdr_in->pe.e_ip       = 0x0;
+   filehdr_in->pe.e_cs       = 0x0;
+-  filehdr_in->pe.e_lfarlc   = 0x40;
++  filehdr_in->pe.e_lfarlc   = 0x0;
+   filehdr_in->pe.e_ovno     = 0x0;
+ 
+   for (idx = 0; idx < 4; idx++)
+     filehdr_in->pe.e_res[idx] = 0x0;
+@@ -824,15 +824,10 @@
+ 
+   for (idx = 0; idx < 10; idx++)
+     filehdr_in->pe.e_res2[idx] = 0x0;
+ 
+-  filehdr_in->pe.e_lfanew = 0x80;
++  filehdr_in->pe.e_lfanew = 0x40;
+ 
+-  /* This next collection of data are mostly just characters.  It
+-     appears to be constant within the headers put on NT exes.  */
+-  memcpy (filehdr_in->pe.dos_message, pe_data (abfd)->dos_message,
+-	  sizeof (filehdr_in->pe.dos_message));
+-
+   filehdr_in->pe.nt_signature = IMAGE_NT_SIGNATURE;
+ 
+   H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->f_magic);
+   H_PUT_16 (abfd, filehdr_in->f_nscns, filehdr_out->f_nscns);
+@@ -881,11 +876,8 @@
+     H_PUT_16 (abfd, filehdr_in->pe.e_res2[idx], filehdr_out->e_res2[idx]);
+ 
+   H_PUT_32 (abfd, filehdr_in->pe.e_lfanew, filehdr_out->e_lfanew);
+ 
+-  memcpy (filehdr_out->dos_message, filehdr_in->pe.dos_message,
+-	  sizeof (filehdr_out->dos_message));
+-
+   /* Also put in the NT signature.  */
+   H_PUT_32 (abfd, filehdr_in->pe.nt_signature, filehdr_out->nt_signature);
+ 
+   return FILHSZ;
+@@ -3014,10 +3006,8 @@
+   if (! pe_data (ibfd)->has_reloc_section
+       && ! (pe_data (ibfd)->real_flags & IMAGE_FILE_RELOCS_STRIPPED))
+     pe_data (obfd)->dont_strip_reloc = 1;
+ 
+-  memcpy (ope->dos_message, ipe->dos_message, sizeof (ope->dos_message));
+-
+   /* The file offsets contained in the debug directory need rewriting.  */
+   size = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size;
+   if (size != 0)
+     {
+--- binutils/od-pe.c
++++ binutils/od-pe.c
+@@ -324,49 +324,9 @@
+       printf (_("OEM information:\t\t%#x\n"), data);
+   
+       ldata = bfd_h_get_32 (abfd, fhdr->e_lfanew);
+       printf (_("File address of new exe header:\t%#lx\n"), ldata);
+-        
+-      /* Display the first string found in the stub.
+-	 FIXME: Look for more than one string ?
+-	 FIXME: Strictly speaking we may not have read the full stub, since
+-	 it can be longer than the dos_message array in the PEI_fileheader
+-	 structure.  */
+-      const unsigned char * message = (const unsigned char *) fhdr->dos_message;
+-      unsigned int len = sizeof (fhdr->dos_message);
+-      unsigned int i;
+-      unsigned int seen_count = 0;
+-      unsigned int string_start = 0;
+-  
+-      for (i = 0; i < len; i++)
+-	{
+-	  if (ISPRINT (message[i]))
+-	    {
+-	      if (string_start == 0)
+-		string_start = i;
+-	      ++ seen_count;
+-	      if (seen_count > 4)
+-		break;
+-	    }
+-	  else
+-	    {
+-	      seen_count = string_start = 0;
+-	    }
+-	}
+ 
+-      if (seen_count > 4)
+-	{
+-	  printf (_("Stub message:\t\t\t"));
+-	  while (string_start < len)
+-	    {
+-	      char c = message[string_start ++];
+-	      if (! ISPRINT (c))
+-		break;
+-	      putchar (c);
+-	    }
+-	  putchar ('\n');
+-	}
+-
+       ihdr_off = (long) bfd_h_get_32 (abfd, fhdr->e_lfanew);
+     }
+ 
+   printf (_("\n  Image Header (at offset %#lx):\n"), ihdr_off);
+--- include/coff/msdos.h
++++ include/coff/msdos.h
+@@ -47,9 +47,8 @@
+   char e_oemid[2];		/* OEM identifier.  */
+   char e_oeminfo[2];		/* OEM information.  */
+   char e_res2[10][2];		/* Reserved words, all 0x0.  */
+   char e_lfanew[4];		/* File address of new exe header, usually 0x80.  */
+-  char dos_message[64];		/* Other stuff, always follow DOS header.  */
+ };
+ 
+ /* The actual DOS header only includes up to the e_ovno field.  */
+ #define DOS_HDR_SIZE		(offsetof (struct external_DOS_hdr, e_res))
+--- include/coff/pe.h
++++ include/coff/pe.h
+@@ -219,9 +219,8 @@
+   char e_oemid[2];		/* OEM identifier (for e_oeminfo), 0x0.  */
+   char e_oeminfo[2];		/* OEM information; e_oemid specific, 0x0.  */
+   char e_res2[10][2];		/* Reserved words, all 0x0.  */
+   char e_lfanew[4];		/* File address of new exe header, usually 0x80.  */
+-  char dos_message[64];		/* Other stuff, always follow DOS header.  */
+ 
+   /* Note: additional bytes may be inserted before the signature.  Use
+    the e_lfanew field to find the actual location of the NT signature.  */
+ 
+@@ -243,9 +242,9 @@
+ 
+ #undef  FILHDR
+ #define FILHDR struct external_PEI_filehdr
+ #undef  FILHSZ
+-#define FILHSZ 152
++#define FILHSZ 88
+ 
+ #endif /* COFF_IMAGE_WITH_PE */
+ 
+ /* 32-bit PE a.out header:  */
