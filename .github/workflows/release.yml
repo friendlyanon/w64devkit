@@ -32,7 +32,7 @@ jobs:
       run: docker buildx b -t mingw src
 
     - name: Run
-      run: docker run --rm mingw > mingw.zip
+      run: docker run --rm mingw > mingw.exe
 
     - name: Get date
       id: date
@@ -41,6 +41,6 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        files: mingw.zip
+        files: mingw.exe
         tag_name: r${{ steps.date.outputs.date }}
         body: Release ${{ steps.date.outputs.date }}
