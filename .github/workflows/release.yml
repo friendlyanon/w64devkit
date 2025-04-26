@@ -30,20 +30,10 @@ jobs:
     - name: Patch
       run: |
         patch -p 0 -u -i minimal.patch
-        cp minimal-pe-header.patch src
         if [ ${{ matrix.variant }} = x86 ]; then
-          perl -i -p -e '
-            s/(ARG ARCH=)x86_64-w64-mingw32/${1}i686-w64-mingw32/;
-            s/--disable-lib32/--enable-lib32/;
-            s/--enable-lib64/--disable-lib64/;
-            print
-              "        --with-default-win32-winnt=0x0501 \\\n" .
-              "        --with-arch=pentium4 \\\n"
-              if /with-default-msvcrt=msvcrt-os/;
-            print "        --disable-win32-utf8-manifest \\\n"
-              if /disable-win32-registry/;
-          ' src/Dockerfile
+          patch -p 0 -u -i minimal-32.patch
         fi
+        cp minimal-pe-header.patch src
 
     - name: Build
       run: docker buildx b -t mingw src
