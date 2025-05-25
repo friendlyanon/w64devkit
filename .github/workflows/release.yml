@@ -33,7 +33,7 @@ jobs:
         if [ ${{ matrix.variant }} = x86 ]; then
           patch -p 0 -u -i minimal-32.patch
         fi
-        cp minimal-pe-header.patch src
+        cp binutils-minimal-pe-header.patch src/src
 
     - name: Build
       run: docker buildx b -t mingw src
