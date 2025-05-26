@@ -36,10 +36,10 @@ jobs:
         cp binutils-minimal-pe-header.patch src/src
 
     - name: Build
-      run: docker buildx b -t mingw src
+      run: podman build -t mingw src
 
     - name: Run
-      run: docker run --rm mingw > mingw-${{ matrix.variant }}.exe
+      run: podman run --rm mingw > mingw-${{ matrix.variant }}.exe
 
     - name: Upload
       uses: actions/upload-artifact@v4
