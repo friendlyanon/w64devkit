@@ -3,11 +3,11 @@
 @@ -4,19 +4,12 @@
  ARG PREFIX=/w64devkit
  ARG Z7_VERSION=2301
- ARG BINUTILS_VERSION=2.44
+ ARG BINUTILS_VERSION=2.45
 -ARG BUSYBOX_VERSION=FRP-5579-g5749feb35
 -ARG CTAGS_VERSION=6.0.0
 -ARG EXPAT_VERSION=2.7.0
- ARG GCC_VERSION=15.1.0
+ ARG GCC_VERSION=15.2.0
 -ARG GDB_VERSION=16.2
  ARG GMP_VERSION=6.3.0
 -ARG LIBICONV_VERSION=1.18
@@ -22,15 +22,15 @@
    build-essential curl libgmp-dev libmpc-dev libmpfr-dev m4 p7zip-full
 @@ -27,38 +20,22 @@
      https://downloads.sourceforge.net/project/sevenzip/7-Zip/23.01/7z$Z7_VERSION-src.tar.xz \
-     https://ftp.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.xz \
-     https://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz \
--    https://ftp.gnu.org/gnu/gdb/gdb-$GDB_VERSION.tar.xz \
+     https://ftpmirror.gnu.org/gnu/binutils/binutils-$BINUTILS_VERSION.tar.xz \
+     https://ftpmirror.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.xz \
+-    https://ftpmirror.gnu.org/gnu/gdb/gdb-$GDB_VERSION.tar.xz \
 -    https://downloads.sourceforge.net/project/expat/expat/$EXPAT_VERSION/expat-$EXPAT_VERSION.tar.xz \
-     https://ftp.gnu.org/gnu/gmp/gmp-$GMP_VERSION.tar.xz \
-     https://ftp.gnu.org/gnu/mpc/mpc-$MPC_VERSION.tar.gz \
-     https://ftp.gnu.org/gnu/mpfr/mpfr-$MPFR_VERSION.tar.xz \
-     https://ftp.gnu.org/gnu/make/make-$MAKE_VERSION.tar.gz \
--    https://ftp.gnu.org/gnu/libiconv/libiconv-$LIBICONV_VERSION.tar.gz \
+     https://ftpmirror.gnu.org/gnu/gmp/gmp-$GMP_VERSION.tar.xz \
+     https://ftpmirror.gnu.org/gnu/mpc/mpc-$MPC_VERSION.tar.gz \
+     https://ftpmirror.gnu.org/gnu/mpfr/mpfr-$MPFR_VERSION.tar.xz \
+     https://ftpmirror.gnu.org/gnu/make/make-$MAKE_VERSION.tar.gz \
+-    https://ftpmirror.gnu.org/gnu/libiconv/libiconv-$LIBICONV_VERSION.tar.gz \
 -    https://frippery.org/files/busybox/busybox-w32-$BUSYBOX_VERSION.tgz \
 -    https://ftp.nluug.nl/pub/vim/unix/vim-$VIM_VERSION.tar.bz2 \
 -    https://github.com/universal-ctags/ctags/archive/refs/tags/v$CTAGS_VERSION.tar.gz \
@@ -62,7 +62,7 @@
  
  ARG ARCH=x86_64-w64-mingw32
  
-@@ -297,31 +274,7 @@
+@@ -299,31 +276,7 @@
          LDFLAGS="-s" \
   && make -j$(nproc) \
   && make install \
@@ -95,7 +95,7 @@
  
  # Build some extra development tools
  
-@@ -335,49 +288,6 @@
+@@ -337,49 +290,6 @@
   && make -j$(nproc) \
   && cp gendef.exe $PREFIX/bin/
  
@@ -143,9 +143,9 @@
 - && cp gdb/.libs/gdb.exe gdbserver/gdbserver.exe $PREFIX/bin/
 -
  WORKDIR /make
- RUN /make-$MAKE_VERSION/configure \
-         --host=$ARCH \
-@@ -385,110 +295,18 @@
+ COPY src/make-*.patch $PREFIX/src/
+ RUN cat $PREFIX/src/make-*.patch | patch -d/make-$MAKE_VERSION -p1 \
+@@ -389,111 +299,19 @@
          CFLAGS="-std=gnu17 -Os" \
          LDFLAGS="-s" \
   && make -j$(nproc) \
@@ -197,16 +197,17 @@
 -    | xargs -I{} cp alias.exe $PREFIX/bin/{}.exe
 -
 -# TODO: Either somehow use $VIM_VERSION or normalize the workdir
--WORKDIR /vim90/src
--COPY src/rexxd.c $PREFIX/src/
--RUN ARCH= make -j$(nproc) -f Make_ming.mak CC="$ARCH-gcc -std=gnu17" \
+-WORKDIR /vim90
+-COPY src/rexxd.c src/vim-*.patch $PREFIX/src/
+-RUN cat $PREFIX/src/vim-*.patch | patch -p1 \
+- && ARCH= make -C src -j$(nproc) -f Make_ming.mak CC="$ARCH-gcc -std=gnu17" \
 -        OPTIMIZE=SIZE STATIC_STDCPLUS=yes HAS_GCC_EH=no \
 -        UNDER_CYGWIN=yes CROSS=yes CROSS_COMPILE=$ARCH- \
 -        FEATURES=HUGE VIMDLL=yes NETBEANS=no WINVER=0x0501 \
-- && $ARCH-strip vimrun.exe \
-- && rm -rf ../runtime/tutor/tutor.* \
-- && cp -r ../runtime $PREFIX/share/vim \
-- && cp vimrun.exe gvim.exe vim.exe *.dll $PREFIX/share/vim/ \
+- && $ARCH-strip src/vimrun.exe \
+- && rm -rf runtime/tutor/tutor.* \
+- && cp -r runtime $PREFIX/share/vim \
+- && cp src/vimrun.exe src/gvim.exe src/vim.exe src/*.dll $PREFIX/share/vim/ \
 - && printf '@set SHELL=\r\n@start "" "%%~dp0/../share/vim/gvim.exe" %%*\r\n' \
 -        >$PREFIX/bin/gvim.bat \
 - && printf '@set SHELL=\r\n@"%%~dp0/../share/vim/vim.exe" %%*\r\n' \
@@ -238,13 +239,13 @@
  # Pack up a release
  
  WORKDIR /
--RUN rm -rf $PREFIX/share/man/ $PREFIX/share/info/ $PREFIX/share/gcc-*
--COPY README.md Dockerfile src/w64devkit.ini $PREFIX/
+ RUN rm -rf $PREFIX/share/man/ $PREFIX/share/info/ $PREFIX/share/gcc-*
+-COPY README.md Dockerfile w64devkit.ini $PREFIX/
 -RUN printf "id ICON \"$PREFIX/src/w64devkit.ico\"" >w64devkit.rc \
 - && $ARCH-windres -o w64devkit.o w64devkit.rc \
 - && $ARCH-gcc -DVERSION=$VERSION -nostdlib -fno-asynchronous-unwind-tables \
 -        -fno-builtin -Wl,--gc-sections -s -o $PREFIX/w64devkit.exe \
--        $PREFIX/src/w64devkit.c w64devkit.o -lkernel32 -luser32 \
+-        $PREFIX/src/w64devkit.c w64devkit.o -lkernel32 -luser32 -lmemory \
 - && $ARCH-gcc \
 -        -Os -fno-asynchronous-unwind-tables \
 -        -Wl,--gc-sections -s -nostdlib \
@@ -259,7 +260,7 @@
   && $ARCH-gcc \
          -Os -fno-asynchronous-unwind-tables -fno-builtin -Wl,--gc-sections \
          -s -nostdlib -o $PREFIX/bin/vc++filt.exe $PREFIX/src/vc++filt.c \
-@@ -497,18 +315,8 @@
+@@ -502,18 +320,8 @@
          -Os -fno-asynchronous-unwind-tables -fno-builtin -Wl,--gc-sections \
          -s -nostdlib -o $PREFIX/bin/peports.exe $PREFIX/src/peports.c \
          -lkernel32 -lshell32 \
@@ -284,11 +285,11 @@
 +++ src/src/SHA256SUMS
 @@ -1,15 +1,8 @@
  356071007360e5a1824d9904993e8b2480b51b570e8c9faf7c0f58ebe4bf9f74  7z2301-src.tar.xz
- ce2017e059d63e67ddb9240e9d4ec49c2893605035cd60e92ad53177f4377237  binutils-2.44.tar.xz
+ c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2  binutils-2.45.tar.xz
 -cde68932d0680939977344259182482341adfffac4558cd1592bc26d2b558311  busybox-w32-FRP-5579-g5749feb35.tgz
 -71229a73f25529c9e3dabb2cb7310c55405d31caee8e8a9ab5c71b2406d4005a  ctags-6.0.0.tar.gz
 -25df13dd2819e85fb27a1ce0431772b7047d72af81ae78dc26b4c6e0805f48d1  expat-2.7.0.tar.xz
- e2b09ec21660f01fecffb715e0120265216943f038d0e48a9868713e54f06cea  gcc-15.1.0.tar.xz
+ 438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e  gcc-15.2.0.tar.xz
 -4002cb7f23f45c37c790536a13a720942ce4be0402d929c9085e92f10d480119  gdb-16.2.tar.xz
  a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898  gmp-6.3.0.tar.xz
 -3b08f5f4f9b4eb82f151a7040bfd6fe6c6fb922efe4b1659c66ea933276965e8  libiconv-1.18.tar.gz

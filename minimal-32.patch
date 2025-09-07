@@ -9,7 +9,7 @@
  
  # Build cross-compiler
  
-@@ -67,6 +67,7 @@
+@@ -69,6 +69,7 @@
          --prefix=/bootstrap \
          --host=$ARCH \
          --with-default-msvcrt=msvcrt-os \
@@ -17,7 +17,7 @@
   && make -j$(nproc) \
   && make install
  
-@@ -79,6 +80,7 @@
+@@ -81,6 +82,7 @@
   && /gcc-$GCC_VERSION/configure \
          --prefix=/bootstrap \
          --with-sysroot=/bootstrap \
@@ -25,7 +25,7 @@
          --target=$ARCH \
          --enable-static \
          --disable-shared \
-@@ -118,8 +120,8 @@
+@@ -120,8 +122,8 @@
          --host=$ARCH \
          --with-default-msvcrt=msvcrt-os \
          --disable-dependency-tracking \
@@ -36,7 +36,7 @@
          CFLAGS="-Os" \
          LDFLAGS="-s" \
   && make -j$(nproc) \
-@@ -206,6 +208,7 @@
+@@ -208,6 +210,7 @@
          --prefix=$PREFIX \
          --host=$ARCH \
          --with-default-msvcrt=msvcrt-os \
@@ -44,7 +44,7 @@
   && make -j$(nproc) \
   && make install
  
-@@ -216,8 +219,8 @@
+@@ -218,8 +221,8 @@
          --host=$ARCH \
          --with-default-msvcrt=msvcrt-os \
          --disable-dependency-tracking \
@@ -55,7 +55,7 @@
          CFLAGS="-Os" \
          LDFLAGS="-s" \
   && make -j$(nproc) \
-@@ -244,6 +247,7 @@
+@@ -246,6 +249,7 @@
          --prefix=$PREFIX \
          --with-sysroot=$PREFIX \
          --with-native-system-header-dir=/include \
@@ -63,7 +63,7 @@
          --target=$ARCH \
          --host=$ARCH \
          --enable-static \
-@@ -265,6 +269,7 @@
+@@ -267,6 +271,7 @@
          --disable-multilib \
          --disable-nls \
          --disable-win32-registry \
