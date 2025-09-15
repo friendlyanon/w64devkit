@@ -36,15 +36,15 @@
          CFLAGS="-Os" \
          LDFLAGS="-s" \
   && make -j$(nproc) \
-@@ -208,6 +210,7 @@
-         --prefix=$PREFIX \
+@@ -206,6 +208,7 @@
          --host=$ARCH \
+         --enable-idl \
          --with-default-msvcrt=msvcrt-os \
 +        --with-default-win32-winnt=0x0501 \
   && make -j$(nproc) \
   && make install
  
-@@ -218,8 +221,8 @@
+@@ -216,8 +219,8 @@
          --host=$ARCH \
          --with-default-msvcrt=msvcrt-os \
          --disable-dependency-tracking \
@@ -55,7 +55,7 @@
          CFLAGS="-Os" \
          LDFLAGS="-s" \
   && make -j$(nproc) \
-@@ -246,6 +249,7 @@
+@@ -244,6 +247,7 @@
          --prefix=$PREFIX \
          --with-sysroot=$PREFIX \
          --with-native-system-header-dir=/include \
@@ -63,7 +63,7 @@
          --target=$ARCH \
          --host=$ARCH \
          --enable-static \
-@@ -267,6 +271,7 @@
+@@ -262,6 +266,7 @@
          --disable-multilib \
          --disable-nls \
          --disable-win32-registry \

@@ -62,7 +62,7 @@
  
  ARG ARCH=x86_64-w64-mingw32
  
-@@ -299,31 +276,7 @@
+@@ -294,32 +271,7 @@
          LDFLAGS="-s" \
   && make -j$(nproc) \
   && make install \
@@ -84,8 +84,9 @@
 -        -Os -fno-asynchronous-unwind-tables -Wl,--gc-sections -s -nostdlib \
 -        -o $PREFIX/bin/c89.exe $PREFIX/src/alias.c -lkernel32 \
 - && printf '%s\n' addr2line ar as c++filt cpp dlltool dllwrap elfedit g++ \
--      gcc gcc-ar gcc-nm gcc-ranlib gcov gcov-dump gcov-tool ld nm objcopy \
--      objdump ranlib readelf size strings strip windmc windres gfortran \
+-      gcc gcc-ar gcc-nm gcc-ranlib gcov gcov-dump gcov-tool gendef gfortran \
+-      ld nm objcopy objdump ranlib readelf size strings strip uuidgen widl \
+-      windmc windres \
 -    | xargs -I{} -P$(nproc) \
 -          $ARCH-gcc -DEXE={}.exe -DCMD=$ARCH-{} \
 -            -Os -fno-asynchronous-unwind-tables \
@@ -95,9 +96,9 @@
  
  # Build some extra development tools
  
-@@ -337,49 +290,6 @@
-  && make -j$(nproc) \
-  && cp gendef.exe $PREFIX/bin/
+@@ -346,49 +298,6 @@
+  && $ARCH-gcc -nostartfiles -Oz -s -o $PREFIX/bin/uuidgen.exe \
+         $PREFIX/src/uuidgen.c -lmemory
  
 -WORKDIR /expat
 -RUN /expat-$EXPAT_VERSION/configure \
@@ -145,7 +146,7 @@
  WORKDIR /make
  COPY src/make-*.patch $PREFIX/src/
  RUN cat $PREFIX/src/make-*.patch | patch -d/make-$MAKE_VERSION -p1 \
-@@ -389,111 +299,19 @@
+@@ -398,111 +307,19 @@
          CFLAGS="-std=gnu17 -Os" \
          LDFLAGS="-s" \
   && make -j$(nproc) \
@@ -260,7 +261,7 @@
   && $ARCH-gcc \
          -Os -fno-asynchronous-unwind-tables -fno-builtin -Wl,--gc-sections \
          -s -nostdlib -o $PREFIX/bin/vc++filt.exe $PREFIX/src/vc++filt.c \
-@@ -502,18 +320,8 @@
+@@ -511,18 +328,8 @@
          -Os -fno-asynchronous-unwind-tables -fno-builtin -Wl,--gc-sections \
          -s -nostdlib -o $PREFIX/bin/peports.exe $PREFIX/src/peports.c \
          -lkernel32 -lshell32 \
